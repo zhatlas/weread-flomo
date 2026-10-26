@@ -111,7 +111,15 @@ function RunDetail({ run, close, revision }: { run: Run; close: () => void; revi
   const [error, setError] = useState('');
   useEffect(() => { let current = true; api<typeof data>(`/runs/${run.id}`).then((r) => { if (current) setData(r); }).catch((e) => { if (current) setError(message(e)); }); return () => { current = false; }; }, [run.id, revision]);
   const coverage = JSON.parse(data?.run.coverage_json ?? '{}') as { expectedBooks?: number; listComplete?: boolean };
-  return <Modal title="同步详情" close={close}><Alert>{error}</Alert><p><span className={`badge ${data?.run.status ?? run.status}`}>{statusText[data?.run.status ?? run.status]}</span> {date(run.started_at)}</p><p>书籍列表：{coverage.listComplete ? '遍历完成' : '未完成'} · 计划读取 {coverage.expectedBooks ?? '—'} 本书</p>{data?.run.error_code && <Alert>{messages[data.run.error_code] ?? data.run.error_code}</Alert>}<p className="muted">完成表示本次可返回数据已保存，不代表已确认来源删除情况。</p><div className="scope-list">{data?.items.map((item) => <div key={`${item.book_id}:${item.kind}`}><span>{item.title || `书籍 ${item.book_id}`} · {item.kind === 'highlight' ? '划线' : item.kind === 'thought' ? '想法' : '书籍信息'}</span><strong className={item.status === 'failed' ? 'error-text' : ''}>{item.status === 'failed' ? messages[item.error_code ?? ''] ?? item.error_code : `${item.count} 条`}</strong></div>)}</div></Modal>;
+  type Item = NonNullable<typeof data>['items'][number];
+  const books = new Map<string, { title: string; items: Map<string, Item> }>();
+  for (const item of data?.items ?? []) {
+    const book = books.get(item.book_id) ?? { title: item.title || `书籍 ${item.book_id}`, items: new Map<string, Item>() };
+    book.items.set(item.kind, item);
+    books.set(item.book_id, book);
+  }
+  const result = (item?: Item) => !item ? '未读取' : item.status === 'failed' ? messages[item.error_code ?? ''] ?? item.error_code ?? '读取失败' : `${item.count} 条`;
+  return <Modal title="同步详情" close={close}><Alert>{error}</Alert><p><span className={`badge ${data?.run.status ?? run.status}`}>{statusText[data?.run.status ?? run.status]}</span> {date(run.started_at)}</p><p>书籍列表：{coverage.listComplete ? '遍历完成' : '未完成'} · 计划读取 {coverage.expectedBooks ?? '—'} 本书</p>{data?.run.error_code && <Alert>{messages[data.run.error_code] ?? data.run.error_code}</Alert>}<p className="muted">完成表示本次可返回数据已保存，不代表已确认来源删除情况。</p><div className="scope-list sync-books">{[...books].map(([id, book]) => <div key={id}><span>{book.title}</span><strong>{(['highlight', 'thought', ...(book.items.has('metadata') ? ['metadata'] : [])]).map((kind, index) => <span key={kind}>{index > 0 && '，'}<span className={book.items.get(kind)?.status === 'failed' ? 'error-text' : ''}>{kind === 'highlight' ? '划线' : kind === 'thought' ? '想法' : '书籍信息'} {result(book.items.get(kind))}</span></span>)}</strong></div>)}</div></Modal>;
 }
 
 createRoot(document.getElementById('root')!).render(<App />);

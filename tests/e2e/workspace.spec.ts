@@ -24,7 +24,10 @@ test('administrator sets up, connects, syncs and browses on desktop and mobile',
   await expect(page.getByText('读取完成', { exact: true })).toBeVisible();
   await page.screenshot({ path: info.outputPath('overview-desktop.png'), fullPage: true });
   await page.getByRole('button', { name: /微信读书 · 完整遍历/ }).click();
-  await expect(page.getByRole('dialog', { name: '同步详情' })).toContainText('阅读与生活');
+  const syncRows = page.getByRole('dialog', { name: '同步详情' }).locator('.scope-list > div');
+  await expect(syncRows).toHaveCount(1);
+  await expect(syncRows.locator(':scope > span')).toHaveText('阅读与生活');
+  await expect(syncRows.locator('strong')).toHaveText('划线 1 条，想法 1 条');
   await page.getByRole('button', { name: '关闭详情' }).click();
   await page.getByRole('button', { name: '笔记库', exact: false }).first().click();
   await expect(page.locator('.note-card')).toHaveCount(2);
