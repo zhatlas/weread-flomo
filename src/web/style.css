@@ -9,3 +9,8 @@
 @media(max-width:760px){.sidebar nav{flex-wrap:wrap}.nav-item{flex:1;min-width:52px}.nav-item>span{display:none}}
 
 .sync-books>div>span,.sync-books strong{min-width:0;overflow-wrap:anywhere}
+
+.language-switcher{display:flex;flex-direction:row;align-items:center;gap:6px;margin:0;font-size:12px;white-space:nowrap}.language-switcher select{width:auto;padding:5px 7px;font-size:12px}.auth-shell>.language-switcher{justify-content:flex-end;margin-bottom:20px}.nav-item{min-width:0}.topbar{gap:12px;height:auto;min-height:77px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}.topbar>div{flex-wrap:wrap}.hero h2{overflow-wrap:anywhere}.book-cover>span{font-size:19px}.settings-card,.rule-row>div{min-width:0}.section-heading{flex-wrap:wrap}.rule-actions button{white-space:normal}.rules-workspace .scope-list>div>*{min-width:0;overflow-wrap:anywhere}
+@media(max-width:760px){.topbar{min-height:51px}.topbar>div{gap:8px}.topbar .language-switcher span{display:none}.nav-item{white-space:normal}.page-heading{flex-wrap:wrap}.hero{padding:20px}.hero h2{font-size:23px}.hero>div:first-child{min-width:0}.book-art{flex-shrink:0}.rule-actions{flex-wrap:wrap}.pagination{flex-wrap:wrap}}
+
+.brand-mark{flex-shrink:0}.brand>div{min-width:0}.brand small{white-space:normal;letter-spacing:1px}.sidebar .brand{font-size:16px;gap:8px}

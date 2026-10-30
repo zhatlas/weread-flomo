@@ -1,17 +1,23 @@
-# 安全说明
+# Security
 
-当前为 M3 早期实现，尚无承诺长期支持的生产版本。已实现会话认证、Origin/CSRF、登录限速、凭据加密与固定上游目的地，具体流程见 [使用与运维](docs/usage.md)。
+[English](SECURITY.md) · [简体中文](SECURITY.zh-CN.md)
 
-## 报告问题
+This is an early M3 implementation, not a release with a long-term support commitment. Session authentication, Origin/CSRF checks, login limits, credential encryption and fixed provider destinations are implemented. See [Operations](docs/usage.md).
 
-请通过 [GitHub 私密漏洞报告](https://github.com/zhatlas/weread-flomo/security/advisories/new)报告安全问题。不要把凭据、个人笔记或可利用漏洞细节提交到公开 Issue；报告中也请优先使用合成数据与脱敏复现步骤。
+## Reporting vulnerabilities
 
-## 数据边界
+Use [GitHub private vulnerability reporting](https://github.com/zhatlas/weread-flomo/security/advisories/new). Do not post credentials, private notes or exploitable details in public issues. Prefer synthetic data and redacted reproduction steps even in private reports.
 
-微信读书 Key 和 flomo 专属 URL 都视为秘密。日志、诊断导出、截图和错误响应必须脱敏。服务端不回显已保存的秘密；代码仓库不包含生产数据库或用户内容。
+## Data boundaries
 
-计划的公开发布必须覆盖认证、CSRF、XSS、SSRF、凭据存储和发送结果不明时的处理。加密数据库中的凭据不能防御已控制主机的攻击者。
+WeRead keys and personal flomo URLs are secrets. Logs, diagnostics, screenshots and error responses must be redacted. Saved credentials are not returned by the server, and production databases/user content do not belong in the repository.
 
-备份中仍可能包含私人笔记。旧备份恢复会丢失一部分已发送状态，恢复后必须先暂停发送并核对；不要把“数据库恢复成功”等同于“可以安全重发全部任务”。
+Public-release checks must cover authentication, CSRF, XSS, SSRF, secret storage and ambiguous writes. Encrypting credentials does not protect against a compromised host.
 
-运行数据默认存于当前账号的外部应用数据目录，启动与恢复入口拒绝源码内的数据库或密钥目录。部署者应将备份、导出文件和服务配置也保留在源码之外。数据库中的书籍与笔记为明文；API 凭据使用独立主密钥加密。取得数据库和主密钥即可解密凭据，因此两者及备份均不能公开。`npm run check` 包含源码和 Git 跟踪文件的敏感文件检查；发布前仍须审查个人文本、图片和完整 Git 历史。
+Backups contain private notes and can omit delivery records created after the restore point. Restoring a database does not make replaying its entire queue safe. Pause delivery and review history before clearing recovery protection.
+
+Runtime data defaults to an external application-data directory. Startup and restore reject source-local database/key paths. Keep backups, exports and service configuration outside the source tree as well. Books and notes are plaintext in SQLite; API secrets are encrypted with an independent master key. Possession of both database and key permits decryption, so neither they nor their backups may be published.
+
+`npm run check` scans source and Git-tracked files for common private artifacts. Review personal text, images and full Git history separately before publishing.
+
+Language resources are bundled locally and no external translation service receives your data. Browser storage contains only the explicit interface-language choice. Translations and API text are rendered as text, never trusted HTML.

@@ -1,19 +1,21 @@
 ---
-name: Bug report / 问题反馈
-about: 报告可复现的问题，请先脱敏
+name: Bug report (English)
+about: Report a reproducible issue with redacted details
 title: "[Bug] "
 labels: ""
 assignees: ""
 ---
 
-## 当前版本与部署方式
+[English](https://github.com/zhatlas/weread-flomo/blob/main/.github/ISSUE_TEMPLATE/bug_report.md) · [简体中文](https://github.com/zhatlas/weread-flomo/blob/main/.github/ISSUE_TEMPLATE/bug_report.zh-CN.md)
 
-应用版本、操作系统/CPU 架构、Docker 或本地运行：
+## Version and deployment
 
-## 复现步骤
+Application version, operating system/CPU architecture and deployment method:
 
-## 预期行为与实际行为
+## Steps to reproduce
 
-## 脱敏日志或合成数据
+## Expected and actual behavior
 
-请勿粘贴 API Key、flomo 专属 URL、个人笔记或完整数据库。涉及安全问题请先阅读 SECURITY.md。
+## Redacted logs or synthetic data
+
+Do not include API keys, personal flomo URLs, private notes or databases. For security issues, read [Security](https://github.com/zhatlas/weread-flomo/blob/main/SECURITY.md) first.

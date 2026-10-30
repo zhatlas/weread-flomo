@@ -1,29 +1,35 @@
 # WeRead → flomo
 
-[English](README.en.md) · [使用与运维](docs/usage.md) · [产品设计](docs/product.md) · [实施计划](docs/roadmap.md)
+[English](README.md) · [简体中文](README.zh-CN.md)
 
-为个人自行部署的微信读书工具：保存划线和想法，在浏览器里整理自己的阅读库，并按条件自动导入 flomo。
+A self-hosted workspace for WeRead highlights and thoughts. Keep your reading library locally, browse it in your browser, and automatically send selected notes to flomo. MIT licensed; not affiliated with Tencent, WeRead or flomo.
 
-**当前版本：M3，自动同步与按规则导入。** 已实现管理员登录、连接配置、后台同步、笔记浏览、可视化规则、导入预览和持久化发送队列。自动任务默认关闭，需要在“自动任务”页启用。测试使用合成上游，真实 flomo 写入仍需部署者验证。
+**Current scope: M1–M3 are implemented.** Administrator login, encrypted connections, background synchronization, notes, visual rules, import previews, persistent schedules and a durable delivery queue are available. Automation is initially disabled and must be enabled on the Automation page. Tests use synthetic providers; real flomo writes require validation by the deployer.
 
-## 已实现
+## Languages
 
-- SQLite 持久化保存书籍、作者、划线、想法、对应原文、章节、来源时间及原始字段。
-- 微信读书笔记本/想法分页读取、重复同步去重、相同 ID 内容变化更新；任务状态及每本书的失败范围可见。
-- 想法首次有效缺失暂停导入，连续两次完整核对仍缺失则标记“已删除（同步推断）”并取消未发送任务；保留内容、已导入记录与恢复能力。
-- 浏览器关闭后后台任务继续运行；周期或每日定时同步、完整/轻量模式、失败退避和任务重启恢复。
-- 按类型、书籍、关键词、日期筛选；查看原文和原始字段；切换历史连接的数据空间。
-- 单管理员、scrypt 密码、持久化会话、Origin/CSRF 校验、登录限速；凭据使用 AES-256-GCM 加密且不回显。
-- flomo 专属 API 地址仅校验格式并加密保存，不发送测试记录。
-- 按类型、来源日期/时区和包含/排除关键词创建规则（不限书籍、作者）；保存草稿、复制、编辑、启停。
-- 分页预览命中/未命中原因、历史处理范围、缺失字段和完整导入文本；固定书籍信息/引用原文/可选想法排版，自动书名标签及额外标签。
-- 完整同步后建立新增基准；历史范围须明确确认，连接更换会停用关联规则和自动任务。
-- 按已启用规则导入 flomo，跨规则去重，发送前重新匹配；明确失败有限重试，不确定结果人工核对。
-- 请求间隔、滚动 24 小时额度、单条字数保护、导入记录与尝试详情；启用设置跨重启保留；发送中断的单条任务待核对，备份恢复需解除保护。
+The interface supports **English and Simplified Chinese**. On first use, the browser's primary language selects Chinese for any `zh` locale, including Traditional Chinese; all other languages select English. The language selector is available before and after login. A manual choice is saved in this browser and takes priority on subsequent visits.
 
-## 本地启动
+Book titles, authors, passages, thoughts, saved rule names and tags stay unchanged. Changing the interface language does not change the flomo output template or queued text. Translation resources live in `src/web/locales/en.json` and `src/web/locales/zh-CN.json`; see the [localization guide](docs/localization.md) to add a language. Every guide below has a Chinese counterpart linked at its top.
 
-需要 Node.js **24 LTS** 和 npm（最低兼容 Node.js 22.18）。从 GitHub 克隆源码后运行：
+## Features
+
+- SQLite stores books, authors, highlights, thoughts, associated passages, chapters, source timestamps and raw API fields.
+- Paginated notebook/thought reads, source-ID deduplication, updates to existing IDs, and per-book sync details with highlight and thought counts on one row.
+- A first verified missing thought pauses unsent imports. Two consecutive complete checks infer deletion and cancel unsent tasks, while retaining content, sent history and recovery ability. Missing highlights are retained.
+- Background tasks continue after the browser closes. Interval/daily schedules, full/light scans, backoff and restart recovery are persistent.
+- Search by book, type, date and keywords; inspect original API fields and switch between current and previous connection spaces.
+- One administrator, salted scrypt passwords, persistent sessions, Origin/CSRF checks and login rate limits. Credentials use AES-256-GCM and are never returned by settings queries.
+- Saving a flomo API address validates its format and encrypts it without sending a test note.
+- Visual rules support note type, source dates/time zones, include/exclude keywords, drafts, copies, editing, enabling and disabling. Books and authors are unrestricted.
+- Paginated previews explain matches, exclusions, scope and missing fields. The fixed output includes book information, quoted passage, an optional thought, an automatic book tag and optional extra tags.
+- Activation requires a successful full-sync baseline. Including historical notes requires confirmation. Replacing connections disables associated rules and automation.
+- Rule-based delivery deduplicates across rules and rechecks content before sending. Definitely unsent failures have bounded retries; ambiguous outcomes require manual review.
+- Request pacing, rolling 24-hour budgets, character safeguards and attempt history persist. Enabled settings survive restarts; interrupted sends wait for review, and backup restores require explicit recovery review.
+
+## Run locally
+
+Install Node.js **24 LTS** and npm (minimum compatible Node version: 22.18), then run:
 
 ```sh
 git clone https://github.com/zhatlas/weread-flomo.git
@@ -33,15 +39,15 @@ npm run build
 npm start
 ```
 
-打开 `http://127.0.0.1:3000`。首次设置需要读取启动日志所示位置的 `setup-token` 文件，将令牌填入页面，创建自己的管理员账号和至少 12 字符的密码。没有默认账号或默认密码。
+Open `http://127.0.0.1:3000`. Read the `setup-token` file at the location printed in the startup log. Create your own administrator username and a password of at least 12 characters. There are no default credentials.
 
-先在[微信读书官方接入页](https://weread.qq.com/r/weread-skills)获取自己的 API Key；需要导入时，在 [flomo API 页面](https://help.flomoapp.com/advance/api.html)按官方说明获取专属地址。账号权限与额度以上游提供的实际能力为准。
+Get your key from the [official WeRead integration page](https://weread.qq.com/r/weread-skills). For delivery, follow the [flomo API instructions](https://help.flomoapp.com/advance/api.html). Permissions and quotas depend on your upstream accounts.
 
-登录 → 设置 → 填写微信读书 API Key → 检查并保存连接 → 立即同步 → 笔记库。真实 Key 只在页面中填写，不放入仓库。保存时仅执行一次只读笔记本查询；连接成功不等于已经同步全部笔记。
+Sign in → Settings → enter your WeRead API Key → Check and save connection → Sync now → Library. Enter real keys only in the application, never in the repository. Saving a connection makes one read-only notebook request; it does not synchronize all notes.
 
-配置访问地址、备份、开发环境及排错见 [使用与运维](docs/usage.md)。当前提供本地 Node 启动方式，Docker/Compose 和公开镜像尚未提供，不是运行本项目的前提。
+See [Operations](docs/usage.md) for access addresses, configuration, backups and development. This release runs directly with Node.js. Docker/Compose packaging and published images are not yet provided.
 
-## 验证
+## Verify
 
 ```sh
 npm run check
@@ -49,37 +55,36 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-`check` 包含类型检查、lint、数据库/安全/同步测试及生产构建。Playwright 覆盖真实浏览器的初始化、连接、同步、筛选、详情、退出/登录及手机布局。全部测试使用合成数据，不访问真实微信读书或 flomo。系统缺少浏览器依赖时使用 `npx playwright install --with-deps chromium`。
+`check` runs type checking, lint, database/security/sync tests and a production build. Browser tests cover initialization, connections, synchronization, filtering, details, login/logout, rules, automation, recovery and language selection. All test data is synthetic; no real WeRead or flomo services are contacted. If browser system dependencies are missing, use `npx playwright install --with-deps chromium`.
 
-具体结果与未验证范围见 [验证记录](docs/testing.md)。
+See [Testing](docs/testing.md) for coverage and unverified limits.
 
-## 使用边界
+## Boundaries
 
-- 同步范围是官方查询接口可返回的数据。**未收到明确删除事件；想法删除使用两次完整核对推断，界面明确标注依据；划线缺失仍不推断删除。** 不承诺捕获两次读取之间创建后删除的记录。
-- 想法仅在接口提供 `abstract` 或能按同一章节和精确范围匹配划线时关联原文；缺失内容明确显示“缺失”，不猜测文本。
-- 新 Key 无法可靠证明仍属同一账号，更换凭据会建立独立数据空间并保留旧数据。相同 Key 重复保存复用原连接。
-- 串行请求，默认至少间隔 1 秒；30 秒单请求超时；有限重试；整轮最多 30 分钟；单响应最多 32 MiB。以上是项目保护阈值，不是官方额度。
-- 真实账号的完整性、接口变更/删除语义和长时间运行仍需部署者验证。当前为早期版本，不承诺 exactly-once；发送期间响应丢失时需人工核对。
+- Synchronization is limited to data returned by the official query API. **No confirmed deletion events are received.** Thought deletion is inferred from two complete checks; highlight deletion is not inferred. Notes created and removed between polls may never be seen.
+- Thoughts link to passages only through an API `abstract` or an exact chapter/range match. Missing content is marked rather than guessed.
+- Different keys cannot reliably prove account continuity. Replacing a key creates a separate space and preserves old data; saving the same key reuses the existing connection.
+- Reads are serialized, normally at least one second apart, with a 30-second request timeout, bounded retries, a 30-minute run limit and a 32 MiB response cap. These are application safeguards, not official quotas.
+- Real-account completeness, upstream changes/deletion semantics and sustained large-scale operation still need deployer validation. Exactly-once delivery is not promised: an ambiguous write requires review.
 
-## 开发与设计
+## Development and documentation
 
-TypeScript + React/Vite + Fastify + SQLite（better-sqlite3），单实例、单工作区；无外部队列、无项目作者托管服务器、无遥测。
+TypeScript + React/Vite + Fastify + SQLite (`better-sqlite3`), one instance and one workspace. No external queue, author-hosted backend or telemetry.
 
-| 文档 | 内容 |
+| Document | Contents |
 | --- | --- |
-| [使用与运维](docs/usage.md) | 启动、配置、备份、开发及故障处理 |
-| [产品设计](docs/product.md) | 页面、规则语义和产品边界 |
-| [技术架构](docs/architecture.md) | 模块、部署、认证与密钥 |
-| [同步设计](docs/synchronization.md) | 完整目标和阶段差异 |
-| [数据库设计](docs/data-model.md) | 表结构和数据保留 |
-| [M1 迁移](migrations/001.sql) / [M2 迁移](migrations/002.sql) / [M3 迁移](migrations/003.sql) / [规则格式迁移](migrations/004.sql) / [删除核对迁移](migrations/005.sql) / [重启恢复迁移](migrations/006.sql) | 当前运行时实际使用的结构 |
-| [完整候选 SQL](design/schema.sql) | 独立的约束设计草案，不用于初始化运行时数据库 |
-| [上游依据](docs/upstream.md) | 已确认字段与尚待验证事项 |
-| [实施计划](docs/roadmap.md) | 阶段范围和发布标准 |
-| [变更记录](CHANGELOG.md) | 已实现变更 |
+| [Operations](docs/usage.md) | Startup, configuration, backups, development and troubleshooting |
+| [Product design](docs/product.md) | Pages, rule semantics and boundaries |
+| [Architecture](docs/architecture.md) | Modules, deployment, authentication and secrets |
+| [Synchronization](docs/synchronization.md) | Read, deletion and delivery state machines |
+| [Data model](docs/data-model.md) | Tables and retention |
+| [Localization](docs/localization.md) | Language selection and translation contributions |
+| [Upstream contracts](docs/upstream.md) | Verified fields and remaining uncertainties |
+| [Roadmap](docs/roadmap.md) | Implemented stages and future deployment work |
+| [Changelog](CHANGELOG.md) | Implemented changes |
 
-遵循 [贡献指南](CONTRIBUTING.md) 与 [安全说明](SECURITY.md)。仓库不含个人凭据、笔记、数据库或真实接口录制。与腾讯、微信读书、flomo 均无官方隶属关系。
+The runtime schema is defined by migrations [001](migrations/001.sql), [002](migrations/002.sql), [003](migrations/003.sql), [004](migrations/004.sql), [005](migrations/005.sql) and [006](migrations/006.sql). The [candidate SQL](design/schema.sql) is an independent design/constraint model, not the runtime initializer.
 
-[MIT License](LICENSE)
+Read [Contributing](CONTRIBUTING.md) and [Security](SECURITY.md). The repository contains no personal credentials, notes, databases or real authenticated API recordings. [MIT License](LICENSE) · [中文许可参考译文](LICENSE.zh-CN.md).
 
-运行数据默认保存在当前用户的应用数据目录，源码目录只保存程序。Linux 默认为 `~/.local/share/weread-flomo/`，支持绝对路径的 `XDG_DATA_HOME`；macOS 为 `~/Library/Application Support/weread-flomo/`，Windows 为 `%LOCALAPPDATA%/weread-flomo/`。目录内的 `data/` 保存数据库，`secrets/` 保存密钥。配置文件为该目录下的 `config.env`；也可使用进程环境变量。旧版升级请先按[迁移说明](docs/usage.md#源码与个人数据分离034)迁移数据。
+Runtime data is stored outside the source tree under the account running the process: Linux `~/.local/share/weread-flomo/` (absolute `XDG_DATA_HOME` supported), macOS `~/Library/Application Support/weread-flomo/`, Windows `%LOCALAPPDATA%/weread-flomo/`. Its `data/` and `secrets/` directories contain the database and keys; optional configuration is read from `config.env`. See [migration instructions](docs/usage.md#separating-source-and-personal-data-034) before upgrading an older installation.

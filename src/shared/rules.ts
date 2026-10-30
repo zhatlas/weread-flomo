@@ -44,8 +44,8 @@ export function defaultRule(sourceConnectionId = '', destinationId = ''): RuleCo
     output: { tags: [] } };
 }
 export const reasonLabels: Record<string, string> = {
-  SOURCE_REMOVED: '已删除（同步推断）', SOURCE_MISSING: '疑似删除，待复核', SOURCE_UNAVAILABLE: '来源暂无法核对',
-  INACTIVE: '来源记录不可用', KIND: '类型不符',
-  TIME_MISSING: '来源创建时间缺失', DATE: '不在日期范围内', EXCLUDE: '命中排除词', INCLUDE: '未满足包含词条件',
-  BEFORE_ACTIVATION: '尚未建立新增基准', EXISTING_NOTE: '基准之前已入库',
+  SOURCE_REMOVED: "Deleted (inferred from sync)", SOURCE_MISSING: "Possibly deleted, pending review", SOURCE_UNAVAILABLE: "Source cannot be checked",
+  INACTIVE: "Source record unavailable", KIND: "Note type does not match",
+  TIME_MISSING: "Source creation time missing", DATE: "Outside date range", EXCLUDE: "Excluded keyword matched", INCLUDE: "Include keywords do not match",
+  BEFORE_ACTIVATION: "New-note baseline not yet established", EXISTING_NOTE: "Saved before the baseline",
 };

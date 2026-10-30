@@ -1,17 +1,19 @@
 ---
-name: Feature request / 功能建议
-about: 说明使用场景和期望结果
+name: Feature request (English)
+about: Describe the use case and intended outcome
 title: "[Feature] "
 labels: ""
 assignees: ""
 ---
 
-## 想解决的问题
+[English](https://github.com/zhatlas/weread-flomo/blob/main/.github/ISSUE_TEMPLATE/feature_request.md) · [简体中文](https://github.com/zhatlas/weread-flomo/blob/main/.github/ISSUE_TEMPLATE/feature_request.zh-CN.md)
 
-## 用户操作与期望结果
+## Problem to solve
 
-## 现有方式为什么不足
+## User actions and expected outcome
 
-## 验收示例
+## Why the current approach is insufficient
 
-请使用虚构内容，不提供账号或私人笔记。
+## Acceptance examples
+
+Use fictional content, not account details or private notes.

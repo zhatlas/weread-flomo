@@ -1,60 +1,66 @@
-# 同步、去重与恢复
+# Synchronization, deduplication and recovery
 
-阶段说明：M3 已实现 full/light、自动计划、持久化队列、重试/待核对及重启保护。0.3.2 已启用想法 missing/removed 两次核对推断及待发送任务挂起，划线缺失仍保留。下文含目标设计，实际调度、配额与恢复策略见 [使用与运维](usage.md)。
+[English](synchronization.md) · [简体中文](synchronization.zh-CN.md)
 
-## 数据来源
+M3 implements full/light scans, persistent schedules/queues, retry/review and restart protection. Version 0.3.2 adds inferred thought missing/removal state and unsent-task holds. Missing highlights are retained. This design includes broader intent; see [Operations](usage.md) for exact implemented limits.
 
-笔记本列表：`/user/notebooks`，使用 count + lastSort，遍历到 hasMore=0。
-划线：每本书 `/book/bookmarklist`，保存 updated 中的划线及相关章节信息。
-想法：每本书 `/review/list/mine`，参数是小写 bookid；使用 synckey 翻页。
+## Sources
 
-bookId、bookmarkId、reviewId 均作为不透明字符串；不要把它们转换为数字或解析内部格式。书籍和笔记身份均包含 source_connection_id，不能混合不同账号。
+- Notebooks: `/user/notebooks`, `count` + `lastSort`, until `hasMore=0`.
+- Highlights: `/book/bookmarklist` per book, preserving `updated` highlights and chapter data.
+- Thoughts: `/review/list/mine`, lowercase `bookid`, paginated with `synckey`.
 
-只有验证过稳定账号标识后才能把新凭据归到旧连接；无法验证时按新连接处理，旧数据保留但停用，重新建立同步基准，不把换账号产生的历史记录自动发往 flomo。首版只有一组活动连接。
+Treat bookId, bookmarkId and reviewId as opaque strings. Identity includes the source connection and must never mix accounts.
 
-## 每轮流程
+Without a verified stable account identifier, a new key creates a separate connection space and disables related old configuration rather than merging identities. Old content remains and a new baseline is required; account replacement must not automatically send old notes as new.
 
-1. 获取同步锁并记录 run。读取本轮模式和配置快照。
-2. 遍历笔记本列表；候选书籍为本轮列表与本地已知书籍的并集。
-3. full 模式逐本读取两种内容；light 模式根据 sort、计数等变化选取书籍，并说明此策略可能遗漏不反映在概览中的变化。
-4. 想法继续分页直到 hasMore=0；重复游标、缺必填字段、未知响应结构、错误码均使该书该类型的扫描失败，不能把它当作空列表。
-5. 本轮完整读到的记录按来源 ID upsert；内容 hash 只覆盖内容、原文、定位和样式等业务字段，不包括 last_seen 等采集字段。
-6. 归一化与原始 JSON 一并存储。章节名称缺失时按 chapterUid 补充，原文优先 abstract；必要时只按同书同章同 range 精确关联划线。
-7. 成功读取的部分可提交；整轮有失败则状态为 partial，不能更新时间为“全部成功”。
-8. 对满足规则的候选记录生成队列任务，unique(note_id, destination_id) 防重复。每轮结束记录 counts、失败范围和下次时间。
+## One run
 
-日常同步不因概览 reviewCount=0 就跳过 full 模式的个人想法读取。总数和 sort 是提示，不作为删除证明。
+1. Acquire the sync lock and record the run, mode and settings snapshot.
+2. Traverse notebooks; candidates are the union of the list and locally known books.
+3. Full mode reads both types for every book. Light mode selects books from overview changes such as sort/counts; changes not reflected there can be delayed.
+4. Read all thought pages. Repeated cursors, missing required fields, unknown structures and errors fail that book/type scope rather than pretending it is empty.
+5. Upsert fully read records by source ID. Content hashes cover business content/location/style, not collection metadata.
+6. Normalize and retain raw JSON. Supplement chapters by chapterUid. Link passages through abstract or an exact same-book/chapter/range match.
+7. Successful scopes can commit independently. Any failure makes the run partial; it cannot advance a “fully successful” marker.
+8. Record coverage/counts/errors and scheduling state. Rule-based queue preparation uses unique note/destination identity.
 
-## 缺失与删除
+Full mode does not skip personal thoughts because the overview reports reviewCount=0. Counts and sort are hints, not proof of deletion. Sync details display one row per book ID with highlight/thought results; same-title books remain distinct and failed/unread scopes are not rendered as zero.
 
-公开文档没有承诺删除事件、快照一致性或所有修改的更新时间语义。`updated` 不代表所有变更，`synckey` 也不能未经验证就作为跨运行增量水位。首版优先重新分页读取当前状态。
+## Absence and deletion
 
-想法旧 ID 在完整分页中缺失时，先标记 missing 并挂起任务；连续两次独立核对仍缺失，标记 removed、依据 inferred_absence，并取消未发送任务。完整核对要求每页 totalCount 一致且等于读取的唯一记录数；如概览有顶层 reviewCount 也须一致。没有总数时仅更新读到的记录，未见旧记录标记 unavailable。失败打断连续计数，只有重新见到原 ID 才解除来源缺失。
+Public documentation does not promise deletion events, snapshot consistency or update timestamps for every edit. `updated` is not an incremental guarantee, and `synckey` is not assumed to be a cross-run watermark. Reads start pagination afresh.
 
-书籍从笔记本列表消失不等于其笔记被删除；权限或下架错误标记 unavailable。分页部分失败、接口字段缺失、认证失败、总量异常骤降都不能触发批量删除。不物理删除来源笔记。单书/本轮核对缺失至少 5 条且占一半以上，或多本已知书同时全部变空时，暂停推断并提示 SOURCE_ANOMALY。
+A valid complete thought check missing an old ID marks it missing and holds unsent imports. A second consecutive independent complete check infers removal and cancels unsent tasks. Each page must provide consistent totals matching unique records; any top-level reviewCount must agree. Without totals, observed notes may update but unseen notes become unavailable rather than inferred deleted.
 
-重新出现的同 ID 恢复 active。移除后重新划线如果 ID 改变，视为新记录；如果 ID 被复用，视为原记录恢复，不自动重复导入。当前先以合成数据验证上述状态转换，真实来源长期一致性仍待验证。
+A book disappearing from notebooks does not imply its notes were deleted; old IDs are queried again. Permission/unavailability errors, partial reads, missing fields, authentication failures and anomalous drops cannot prove deletion. Failures reset consecutive absence counts; seeing the original ID clears its missing state. No source notes are physically deleted.
 
-## 发送队列
+At least five missing notes representing half or more of a book/valid batch, or multiple previously populated books becoming empty together, triggers `SOURCE_ANOMALY` and holds deletion inference/delivery.
 
-状态：queued → sending → sent / retry / uncertain；未发送且已不符合规则可转 cancelled。source_hold 是独立的来源暂停原因，不覆盖重试次数或原有阻塞原因；发送只选择 source_hold 为空的任务。来源确认移除后取消任务；sent/uncertain 记录不变。
+Reappearing IDs recover to active. A genuinely different source ID is a new record; an old ID is still the same note and does not trigger duplicate delivery. Synthetic tests cover these transitions; long-term upstream consistency remains to be validated.
 
-- 入队时保存命中的规则 ID/修订号及待发送文本；发送前重新匹配当前规则，更新文本快照。已成功的记录不再入队。
-- 发送前把 attempt 记录为 started，并提交事务。随后发出请求；确认成功后保存响应中的非敏感标识（若提供）及 sent_at。
-- 确认未发送且可重试的错误才进入 retry；限流遵守实际返回，设置 next_attempt_at，使用持久化日配额计数并计入可能成功的请求。
-- 响应丢失、超时或进程在 sending 中崩溃，恢复时标记 uncertain；不自动重发，其他正常任务继续。界面提供“已在 flomo 找到，标记完成”与“确认未导入，允许重试”，后者提示重复风险。
-- flomo 未验证幂等键、查询能力前，不承诺 exactly-once。取得远端 ID 也不能证明普通写入 API 支持查询、编辑或删除。
-- 当天额度用尽保留队列。100 条/天是文档值；其他工具可能占用同账号额度，以服务端响应为准，重置时区和时间待实测。
-- 规则编辑不清空 sent 记录；更新源笔记不自动更新或删除远端 memo。
+## Delivery queue
 
-## 频率与一致性
+Main states: `queued → sending → sent / retry / uncertain`; unsent notes that no longer match may become cancelled. `source_hold` is independent of retry/error state. Only tasks without source holds may send. Confirmed inferred removal cancels unsent tasks; sent/uncertain history is unchanged.
 
-例如 10 本合成示例书的 full 检查约需 `1 + 10 × 2 = 21` 次请求起步；15 分钟一轮约 2,016 次/天，另加分页和元信息请求。该估算不是官方配额或性能保证。
+- Enqueue stores matched rule IDs/revisions and a text snapshot. Before sending, rematch current rules and refresh the unsent snapshot. Successful tasks are not recreated.
+- Persist a started attempt and commit before HTTP. Confirmed success saves a sanitized remote identifier, if available, and sent time.
+- Only definitely unsent, retryable failures get automatic retries. Rate limits respect `Retry-After`; the local budget includes potentially successful attempts.
+- Lost responses, write timeouts and sending-process crashes become uncertain without automatic resend. The UI lets the administrator mark a note found in flomo or explicitly confirm it was not sent and allow retry.
+- Without verified provider idempotency/query support, exactly-once is not promised. A returned ID does not imply that the record API supports reads, edits or deletes.
+- Exhausted budgets retain tasks. Public documentation states 100 writes/day, but other tools may share the account quota and reset semantics need live verification.
+- Rule/source edits do not resend or update already-sent memos.
 
-自动任务默认关闭；周期配置默认 full 每 15 分钟，可设置 5–10,080 分钟或指定每日时刻。light 模式在最近完整成功检查超过 24 小时后，下次调度自动使用 full；不是独立的每日定时全量任务。请求串行、至少间隔 1 秒，有最大运行时长及退避；间隔是项目策略，不是官方保证安全的频率。
+The fixed outgoing text and stored source data are independent of interface language. UI labels and error explanations can change without modifying the queue.
 
-没有 webhook 时，无法保证捕获两次轮询间创建又删除的数据。也不能从一次列表为空判断用户账户没有数据。
+## Frequency and consistency
 
-## 必测场景
+Ten synthetic books in a full run need at least `1 + 10 × 2 = 21` requests. Every 15 minutes is about 2,016/day, plus pagination/metadata. This is an estimate, not a provider quota or performance promise.
 
-重复运行不重复入库；多页完整读取；失败不误删；同 ID 字段变化刷新；换账号隔离；修改规则后未发送任务取消；恢复已发送记录不重发；sending 崩溃转 uncertain；旧备份恢复暂停发送；历史回填与日常新增分开；时间区间与时区边界正确。
+Automation starts off. Intervals default to 15 minutes and allow 5–10,080 minutes or a daily time. Light mode uses a full scan on the next scheduled run when the last successful full scan is at least 24 hours old; this is not a separate wall-clock daily full-scan job. Reads are serialized and bounded with backoff. Polling cannot capture notes created and deleted between checks; one empty response cannot establish an empty account.
+
+## Recovery and required scenarios
+
+Restart preserves user enablement and independent operational blocks. Delivery waits for a new full source check; interrupted writes hold only their own tasks. An independent durable checkpoint detects old database restoration; explicit backup review is required. Whole-device rollback of database and checkpoint cannot be detected locally and still needs the restore workflow.
+
+Tests must cover repeated sync without duplicates, full pagination, failure without false deletion, updates to stable IDs, account isolation, pending-rule changes, sent-record deduplication, interrupted sends becoming uncertain, restored backups blocking delivery, historical/new separation, and date/time-zone boundaries.

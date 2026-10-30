@@ -1,67 +1,74 @@
-# 产品与可视化设置
+# Product and visual settings
 
-状态：完整产品设计。M2 已实现连接、手动同步、总览、笔记库、规则编辑/启停/预览和管理员设置；M3 已加入周期控制、导入记录、失败重试和人工核对。当前不生成未经上游确认的阅读链接，具体边界见使用说明。使用当前实现见 [使用与运维](usage.md)。
+[English](product.md) · [简体中文](product.zh-CN.md)
 
-## 用户与范围
+This is the full product design. M2 implements connections, manual sync, overview, library, rule editing/activation/preview and administrator settings. M3 adds scheduling, delivery history, retries and manual review. Unverified reading links are not generated. See [Operations](usage.md) for current behavior and limits.
 
-用户是希望把个人微信读书笔记按自己的条件同步到 flomo 的 GitHub 用户。每个实例一个管理员、一个工作区、一组活动连接。通用性指所有用户都能设置自己的条件并自行部署；首版不做多人注册、公共托管服务、任意插件平台或任意代码执行。
+## Users and scope
 
-首版完成连接配置、笔记浏览、规则配置、预览、自动同步和故障处理。只使用官方公开 API，保持数据和凭据在部署者控制的设备中。
+For GitHub users who want to synchronize their personal WeRead notes to flomo using their own filters. Each instance has one administrator, one workspace and one active connection per provider. General-purpose means configurable and self-hostable, not multi-user registration, public hosting, an arbitrary plugin platform or user code execution.
 
-## 首次使用
+The application covers connections, browsing, rules, preview, automatic sync and error handling. It uses public official APIs and keeps data/credentials on equipment controlled by the deployer.
 
-1. 启动服务，在受保护的首次设置流程中创建管理员。
-2. 输入微信读书 API Key，执行只读连接检查。页面以后只显示“已配置”和更新时间。
-3. 首次全量获取可访问的数据；逐本展示进度，失败书籍清晰列出。
-4. 输入 flomo 专属 API 地址。保存与格式检查不发送测试笔记；当前没有独立的发送测试按钮。
-5. 创建规则，预览匹配数量、样例、遗漏字段及最终发送文本。
-6. 选择“只处理启用后的新增记录”或“把当前匹配历史记录加入队列”，展示预计批次与额度后启用。
+## First use
 
-历史数据入库不等于导入 flomo。未启用规则时不创建发送任务。首次同步未完成时不能建立“新增”基准，以免把未读到的历史记录误判为新增。
+1. Start the service and create an administrator through protected setup.
+2. Enter a WeRead API Key and run a read-only connection check. Later views show configuration status/time, not the key.
+3. Read all accessible notes, with per-book results and visible failures. Sync details combine highlight/thought counts into one row per book ID.
+4. Save the personal flomo API address. Format validation does not send a test note; there is no separate live-send test button.
+5. Create rules and preview counts, samples, missing fields and final outgoing text.
+6. Choose new-only or explicitly include matching history, then enable the relevant rules and delivery after reviewing scope and request budgets.
 
-## 页面
+Importing history locally does not mean sending it to flomo. Disabled rules create no delivery tasks. Initial synchronization must finish before a new-note baseline can be established, so unread historical IDs are not misclassified as new.
 
-| 页面 | 主要内容与操作 |
+## Pages
+
+| Page | Contents and actions |
 | --- | --- |
-| 总览 | 最近成功检查、下次计划、同步模式、记录数量、队列、限流或认证错误；立即同步、暂停自动任务 |
-| 笔记库 | 按书籍/类型/日期/关键词搜索；展示想法、原文、章节、作者、来源 ID、可用状态 |
-| 规则 | 新建、编辑、复制、停用；匹配预览、未匹配原因、历史回填选择 |
-| 导入记录 | 待发送/成功/重试/待核对/取消；查看最终文本和脱敏结果；仅允许针对适当状态操作 |
-| 设置 | 连接、同步模式、间隔、时区、管理员密码、备份与恢复说明 |
+| Overview | Recent syncs, counts, mode and failures; manual sync |
+| Library | Book/type/date/keyword/source-state search; thoughts, passages, chapter, author, IDs and raw fields |
+| Rules | Create, edit, copy, disable; matching/exclusion previews and history scope |
+| Automation | Schedule/mode/time zone, enablement, next runs, quotas and recovery protection |
+| Delivery history | Queued/sent/retry/uncertain/cancelled tasks, outgoing text, redacted results and permitted resolution actions |
+| Settings | Connections and administrator password |
 
-页面必须区分“检查成功但没有新增”“部分失败”“未配置”“数据可能过期”。不能用绿色成功标记掩盖失败书籍，也不能用 0 替代缺失字段。用户内容按文本或经过清理的受限格式展示，不直接渲染 API 的任意 HTML。
+The interface distinguishes successful checks with no additions, partial failures, missing configuration and potentially stale data. Zero is not a substitute for missing fields. User/API content is text, never arbitrary HTML.
 
-## 首版规则语义
+English and Chinese labels are separate resources. Browser language is the default; a saved manual choice takes priority. Chinese regional/script variants select the current Simplified Chinese edition. Language changes do not translate source data, rule names, keywords, tags or outgoing notes, and do not alter schedule time zones. See [Localization](localization.md).
 
-每条规则内部采用 AND；关键词组可选“任意词命中”或“全部词命中”。多条规则可同时启用，任一命中可入队，同一来源记录对同一目标只建一个导入任务。
+## Rule semantics
 
-| 条件 | 语义 |
+Conditions inside a rule combine with AND. Included keywords support any/all; any enabled matching rule may enqueue a note, but one source note/destination has one task.
+
+| Condition | Meaning |
 | --- | --- |
-| 类型 | 划线 / 想法，可多选；“想法”包含接口归为个人内容的章节点评和整书书评 |
-| 日期 | 按来源创建时间；用户选取含首尾两天的本地日期，转换为半开区间 `[start, nextDay(end))` |
-| 包含关键词 | 选择搜索想法正文、原文或两者；每个词在所选字段任一命中即可，多个词按任意/全部组合 |
-| 排除关键词 | 任一排除词在所选字段命中即拒绝，优先于包含条件 |
+| Type | Highlights and/or thoughts; thoughts include personal chapter comments and book reviews exposed by the API |
+| Date | Source creation time; inclusive local dates converted to `[start, nextDay(end))` |
+| Include keywords | Search thought body, passage or both; each word may match any selected field, then combine by any/all |
+| Exclude keywords | Any match in any selected field rejects the note, before include checks |
 
-关键词为字面量子串，首版不支持正则或用户脚本；英文匹配使用明确记录的大小写不敏感规则，中文按文字匹配。去掉空白关键词，空筛选项表示不限制；缺失创建时间的记录在有日期条件时不匹配，并显示原因。
+Keywords are literal substrings, not regex or scripts. English matching is case-insensitive; Chinese matches literal text. Blank keywords are removed and empty filters impose no restriction. Missing creation times fail date filters with a visible explanation.
 
-时区默认 Asia/Shanghai，可在设置中修改。规则保存有效时区和修订号；预览与执行必须调用同一套服务端匹配逻辑，前端计算仅用于提示。
+Rules default to `Asia/Shanghai`, accept valid IANA zones and save revisions. Preview and delivery share one server-side matcher; frontend calculations are not authoritative.
 
-## 新增、历史与规则修改
+## New notes, history and edits
 
-- “启用后新增”表示建立完整基准后首次观察到的新 ID，使用基准代号和本地首次发现时间判断；来源创建时间继续用于日期筛选。
-- 因换账号、重新初始化或恢复旧备份产生的首次观察不得自动视为日常新增。
-- 编辑规则生成新修订号。未发送任务在发送前重新匹配当前规则；不再命中则取消。
-- 已成功发送的记录不因规则更改自动再次发送。失败重试也不能绕过当前条件。
-- 历史回填通过明确操作触发，展示匹配数和去重后新增任务数。
+- New-only means source IDs first observed after a complete baseline, not source creation dates.
+- First observation after account replacement, reinitialization or old-backup restoration must not silently become routine new-note delivery.
+- Edits increment rule revisions. Pending tasks are matched again before sending and cancelled if no enabled rule matches.
+- Successful sends are not repeated after rule edits; retries also obey current rules.
+- Historical inclusion requires an explicit choice. Preview and queue inspection expose the intended scope and deduplicated tasks.
 
-## 输出模板
+## Output template
 
-规则不限制书籍和作者。采用固定结构：《书名》 作者 · 章节、引用原文、有正文时的“📝 想法：正文”，模块间只换行，不额外加空行；正文原有换行保留。最后自动附加 `#微信读书/书名`，可增加额外标签。标签内书名的空白、# 和 / 转为下划线，正文书名保留原样；不附加创建时间。网页预览用少量样式段间距区分模块，文本内容与实际发送一致，不额外插入空行；没有原文或章节时显示缺失，不伪造。
+Books and authors are unrestricted. The fixed structure is a book/author/chapter header, quoted passage and nonempty thought (`📝 想法：…`), joined by single newlines without extra blank lines. Original internal line breaks remain. An automatic `#微信读书/book_title` tag is followed by extra tags. Whitespace, `#` and `/` in the tag's title become underscores; the displayed title remains unchanged. No creation timestamp is added.
 
-不提供模板执行语言。内容超出目标接口限制时显示阻塞原因；在实际验证目标限制前，不默默截断或自动拆成多条。默认每条来源记录生成一条 flomo 笔记；同时选择划线与想法可能出现相同原文，预览中说明这种情况。
+Preview adds modest CSS paragraph spacing without adding blank lines to outgoing text. Missing passages/chapters are marked, not fabricated. The outgoing template is independent of UI language so browsing in English cannot silently change stored queue payloads or tags.
 
-## 用户可理解的控制
+There is no template execution language. Oversized content is blocked with an explanation, not silently truncated or split. One source record creates one memo; choosing both highlights and thoughts can produce separate notes with the same passage.
 
-“立即同步”只更新本地笔记；“处理待导入”执行发送；“暂停自动任务”阻止新任务启动，已发出的网络请求仍需完成或记为待核对。修改、删除本地记录不会自动修改或删除 flomo 中的笔记。
+## Understandable controls
 
-验收：无需编辑配置文件即可完成连接、规则预览和定时开关；关闭浏览器后后台仍运行；手机宽度可查看状态和暂停；表单支持键盘操作、明确标签与错误提示。
+“Sync now” updates the local library. Queue preparation updates local tasks; delivery requires its own enablement. Pausing prevents new tasks from starting but cannot withdraw an in-flight request, which must finish or become uncertain. Local edits/deletion do not automatically edit/delete flomo content.
+
+Acceptance: connection setup, preview and schedules require no manual config editing; jobs continue after the browser closes; mobile layouts expose status/controls; forms support keyboard navigation, explicit labels and error feedback. Language switching preserves in-progress forms and open views.

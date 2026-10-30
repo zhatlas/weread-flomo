@@ -1,54 +1,49 @@
-# 实施计划与开源发布
+# Roadmap and open-source release
 
-## 当前已完成的准备
+[English](roadmap.md) · [简体中文](roadmap.zh-CN.md)
 
-- 产品边界、页面与规则语义。
-- 单服务部署、持久化调度与发送状态设计。
-- 可执行候选 SQL 与离线约束测试。
-- MIT、双语 README、贡献/安全指南、Issue/PR 模板、基础 CI。
+## Preparation completed
 
-当前发布范围为 M1–M3 的 Node.js 自行部署应用；Docker 与公开镜像尚未提供。
+Product boundaries, pages/rules, single-service deployment, persistent scheduling/delivery design, executable candidate SQL with offline tests, MIT licensing, English/Chinese documentation, contribution/security guidance, Issue/PR templates and basic CI are available.
 
-## M1：本地数据与可视化基础
+The current release is the M1–M3 self-hosted Node application. Docker packaging and public images are not provided.
 
-状态：已实现。使用说明见 [使用与运维](usage.md)。测试使用合成数据，真实账号变更/删除契约和大规模长时间运行仍需验证。
+## M1: local data and visual foundations
 
-实施 TypeScript 项目、锁定依赖、SQLite 迁移、管理员初始化和登录、连接配置、只读客户端、笔记库与状态页。引入依赖时补充类型检查、lint、构建检查。
+Implemented: TypeScript project, pinned dependencies, SQLite migrations, protected administrator setup/login, connections, read-only client, library and status views. See [Operations](usage.md). Tests are synthetic; real-account edit/deletion contracts and sustained large-scale operation still need validation.
 
-验收：可通过界面建立连接；完整分页与失败覆盖可见；重启数据保留；重复同步无重复记录；日志/浏览器查询接口不泄露保存的凭据；认证与 CSRF 有测试。
+Acceptance covers UI connection setup, complete pagination/visible failure scopes, restart persistence, no duplicate records on repeated sync, no saved credential disclosure in logs/query APIs, and authentication/CSRF checks.
 
-## M2：规则与预览
+## M2: rules and preview
 
-状态：已实现类型/日期/关键词条件、固定输出格式、草稿/复制/编辑/启停、时区转换、基准和分页预览。M2 无发送队列；跨规则发送去重及回填执行由 M3 验收。未提供未经上游确认的阅读链接。
+Implemented: type/date/keyword filters, fixed output, drafts/copies/revision-checked editing/enablement, time-zone conversion, baselines and paginated preview. No unverified reading links. Preview and execution share date/keyword/missing-field/revision semantics on the server.
 
-实现文档中的筛选条件和固定发送格式，规则草稿/启用、时区转换、预览样本及命中原因。日期、关键词语义、缺失字段和规则修订使用同一服务端实现。
+M2 itself does not deliver or enqueue. M3 handles cross-rule deduplication and historical execution. Acceptance requires preview/outgoing consistency, no tasks for disabled rules, no automatic history dump on initial synchronization and no duplicate tasks from overlapping rules.
 
-验收：预览与待发送内容一致；规则未启用不创建发送任务；初次历史同步不会自动灌入 flomo；重复匹配不产生重复任务。
+## M3: scheduling and flomo
 
-## M3：自动调度与 flomo
+Implemented: configurable interval/daily schedules, full/light scans, persistent queue, cross-rule deduplication, request budgets/backoff and manual review. Enabled plans survive restart; delivery waits for a complete source check. Ambiguous writes pause only the affected task. Independent checkpoints protect old-database recovery.
 
-状态：已实现可配置周期/每日时刻、完整/轻量读取、持久化队列、跨规则去重、请求预算与退避、人工核对。源计划与导入启用设置重启恢复；导入前完整核对来源，未知结果仅暂停单条，独立发送检查记录保护旧数据库恢复。验证使用合成上游，真实写入与长期运行尚未验收。
+Acceptance covers operation after browser closure, process restart recovery, no blind resend after crashes, edits affecting unsent tasks, visible authentication failures, rate limits without lost tasks and old-backup protection. Synthetic providers validate behavior; real writes and long-running real-account operation remain unverified.
 
-实现数据库 job 状态、单实例锁、15 分钟同步、全量/轻量模式、发送队列、配额/退避、暂停与恢复、待核对流程。
+## Bilingual interface and documentation
 
-验收：关闭浏览器仍运行；服务进程重启恢复；发送中崩溃不盲目重发；规则变更影响未发送任务；认证失效有明确状态；限流不丢任务；旧备份恢复暂停发送。
+English is the default GitHub documentation edition, with Chinese links on each page. The interface selects Chinese for Chinese browser locales and English otherwise, unless the user saved an explicit choice. Translations are separate i18next JSON resources. Source notes and outgoing memo text stay unchanged. See [Localization](localization.md) for contributions and verification.
 
-## M4：可选的部署简化与跨平台验证
+## M4: optional deployment simplification
 
-后续可补充 Dockerfile、Compose、多架构镜像与合成演示截图；现有 Node.js 部署、初始化、升级及备份恢复说明继续维护。只在端到端验收通过后加入真实可用的运行命令和镜像链接。
+Future work may add Dockerfile/Compose, multi-architecture images and synthetic demo screenshots. Keep Node startup, initialization, upgrade and backup documentation current. Publish runnable commands/image links only after end-to-end acceptance.
 
-发布候选必须验证 Linux amd64/arm64、数据库迁移及备份恢复、无网络时的恢复、服务器重启、首次部署和日常使用路径。截图与演示使用合成数据。
+Candidates need Linux amd64/arm64 deployment checks, migrations/restores, offline recovery, reboots, first setup and daily usage validation. Demo data must be synthetic.
 
-## GitHub 准备
+## GitHub release preparation
 
-- 仓库名称 `weread-flomo`，默认分支 main。
-- 默认分支 main，MIT；保留贡献者版权。项目不使用腾讯/flomo 官方 logo，不暗示官方授权。
-- 公开仓库启用 private vulnerability reporting，入口见安全说明。
-- GitHub Actions 仅运行离线检查；PR 不接触生产 secrets，不用 pull_request_target 执行贡献者代码。
-- 引入依赖后提交 lockfile，启用依赖更新与漏洞检查；发布工作流使用固定 Action 修订、最小权限，发布镜像生成 SBOM 并检查第三方许可。
-- 发布前扫描所有文件及 Git 历史，确认没有个人笔记、数据库、Authorization 或带密钥的 flomo URL。
-- 镜像发布由版本 tag 触发，README 中描述已实现功能和已知限制，不将路线图写成已完成功能。
+- Repository `weread-flomo`, default branch `main`, MIT; retain contributor copyright.
+- Do not use Tencent/flomo official logos or imply official endorsement.
+- Enable private vulnerability reporting; see Security.
+- Actions run offline checks with no production secrets. Do not execute contributor code through `pull_request_target`.
+- Commit lockfiles, maintain dependency/vulnerability checks, pin Actions and use minimal permissions. Any future image release should include an SBOM and third-party license review.
+- Scan release files and Git history for personal notes, databases, authorization headers and credential-bearing URLs.
+- Future image publishing should use version tags. Describe implemented features and known limits honestly, not roadmap items as shipped.
 
-## 后续取舍
-
-Docker/Compose 是部署易用性工作，不是公开源码的前置条件。跨平台、长期稳定性与上游真实响应验证按实际需要推进，不将未验收能力描述为已实现。
+Docker/Compose improves deployment convenience but is not a prerequisite for open source. Prioritize cross-platform validation, long-term reliability and upstream response checks according to actual needs.

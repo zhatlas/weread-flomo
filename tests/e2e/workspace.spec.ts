@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+
+test.use({ locale: 'zh-CN' });
 import { password, setupToken, syntheticKey } from '../fixtures.js';
 
 test('administrator sets up, connects, syncs and browses on desktop and mobile', async ({ page }, info) => {

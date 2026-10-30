@@ -1,49 +1,49 @@
-# M3 验证记录
+# Validation record
 
-验证日期：2026-10-23。环境：Linux arm64、Node.js 22.18.0、npm 11.6.1、Chromium 156。推荐部署环境为 Node.js 24 LTS；GitHub Actions 在 Node 24 上执行安装、检查、浏览器测试和依赖审计。远端每次提交的实际结果以仓库 Actions 页面为准。
+[English](testing.md) · [简体中文](testing.zh-CN.md)
 
-## 已通过的检查
+Baseline validation: 2026-10-23, Linux arm64, Node.js 22.18.0, npm 11.6.1 and Chromium 156. Node 24 LTS is recommended; GitHub Actions runs installation, checks, browser tests and dependency audit on Node 24. The actual remote result for each commit is shown in Actions.
 
-| 检查 | 结果与范围 |
+## Previously verified baseline
+
+| Check | Result and scope |
 | --- | --- |
-| TypeScript | 前端、后端、测试与配置无类型错误 |
-| ESLint | 无错误 |
-| Node 测试 | 87 项通过：8 项候选 SQL、2 项仓库检查、77 项运行时测试 |
-| 生产构建 | TypeScript 编译与 Vite 资源构建成功 |
-| Playwright | 7 项通过：生产进程重启、桌面/手机笔记流程、匿名/跨站请求检查，可视化规则完整流程，自动任务/后台发送/人工核对流程，删除核对/恢复流程，以及备份恢复确认流程 |
-| npm audit | 当前锁定依赖报告 0 个已知漏洞；这不是对未来公告的保证 |
+| TypeScript / ESLint | No type or lint errors |
+| Node tests | 87 passed: 8 candidate-SQL tests, 2 repository checks and 77 runtime tests |
+| Build | Server compilation and Vite production assets succeeded |
+| Playwright | 7 passed: process restart, desktop/mobile library, anonymous/cross-origin protections, rules, automation/manual review, deletion/recovery and backup review |
+| Dependency audit | Locked dependencies had no known reported vulnerabilities at that check; this is not a future guarantee |
 
-运行时测试覆盖：初始化令牌与并发初始化；密码散列、登录、过期、退出和改密撤销；Origin、CSRF、限速；凭据加密、篡改检测、不回显、替换隔离；迁移/独占锁/重启恢复；分页完整性、重复游标、重复同步、内容修改、失败保留旧数据、原文精确关联与章节补全；关键词/类型/时间边界/分页；网关请求格式、响应上限、升级/认证/限流/无效响应、重试和跨轮请求间隔；先结束 worker 再关闭数据库。
+The 2026-10-26 sync-detail change added a browser regression for per-book grouping, same-title IDs, zero/missing/error results and mobile layout. Its local checks passed all 87 Node tests and 8 browser tests.
 
-浏览器流程实际操作：创建管理员 → 保存并只读检查连接 → 后台同步 → 查看同步详情 → 浏览/筛选/打开笔记 → 核对书籍、作者、原文和章节 → 手机宽度检查 → 退出/重新登录。注入合成 HTML 文本，确认按普通文本显示且未创建图片元素；收集浏览器脚本错误，结果为空。
+Runtime tests cover setup races, password hashing, login/expiry/logout/password revocation, authentication/Origin/CSRF/rate limits, secret encryption/tampering/redaction/replacement, migrations/instance locks/restarts, pagination/deduplication/edits/partial failure, account isolation, exact passage linkage, chapter supplementation, keyword/date filtering, bounded gateway behavior, and shutdown waiting for workers.
 
-生产入口测试使用编译后的 `dist/server/main.js`，确认自动初始化、设置入口关闭、正常停机、管理员与会话在重启后保留、主密钥未改变、静态页面可以访问。测试进程及数据库在测试结束后清理。
+Browser flows create a synthetic administrator, save/check connections, sync, inspect runs, browse/filter notes, inspect author/passage/chapter fields, check mobile widths and sign out/in. Synthetic HTML remains text, not executable elements. Browser script errors are collected.
 
-M2 新增 10 项后端测试：规则的 AND/任意词/全部词/排除优先级、字面量及英文大小写、缺失时间、包含首尾日期、夏令时 23/25 小时边界、运行时配置校验、全文与缺失字段格式化、认证/CSRF/连接角色、完整基准与中断拒绝、旧记录修改与新增 ID 区分、启停保留基准、历史确认、复制、修订冲突、连接替换停用和隔离、分页与空输出，以及版本 1 → 2 数据迁移保留与重启。
+The production-entrypoint test launches compiled `dist/server/main.js` with external temporary configuration. It verifies initialization, closed setup after use, graceful shutdown, persistent credentials/session/master key and accessible assets. Test processes/data are cleaned up.
 
-规则浏览器操作包含已保存 flomo 连接复用、类型/日期/关键词组合、预览书名/作者/原文/章节、草稿保存、启用、刷新后编辑、复制历史规则、历史确认、排除词、自动书名标签、额外标签、无想法省略、旧预览清除、停用和手机宽度检查；确认书籍/作者限制和输出字段开关已移除。截图使用合成数据。构建和浏览器测试在隔离副本运行，不触碰正在使用的数据库。
+## Stage coverage
 
-M3 新增 16 项后端测试：周期/每日时间及夏令时、错过计划不突发补跑、任务不重叠、轻量跳过与失败不推进指纹、周期完整读取、多规则唯一任务、发送前内容更新、已发送不重发、规则/连接变化取消、持久化限流冷却、最多 5 次安全重试、滚动额度、超长阻塞不截断、未知结果人工核对、旧备份与进程中断恢复、调度失败恢复/认证暂停，以及 M2 → M3 迁移保留。发送客户端测试覆盖 JSON 请求、目的地校验、成功结构、429/Retry-After、4xx/5xx、未知或过大响应、网络失败分类和凭据不回显。
+- **M2:** ten backend tests cover AND/any/all/exclude-first rules, literal case-insensitive matching, missing dates, inclusive dates/DST, schema validation, formatting/missing fields, connection roles and CSRF, complete baselines, stable IDs, enablement/copies/revisions/account isolation, pagination and schema migration. Browser tests exercise the complete visual rule workflow, automatic book tags, optional thoughts and mobile layout.
+- **M3:** sixteen backend tests cover interval/daily time zones and missed schedules, no overlapping jobs, light/full fingerprints, cross-rule uniqueness, pre-send rematching, sent deduplication, persistent quotas/cooldown/retries/character limits, uncertain outcomes, old backups and schema migration. Sender tests cover allowed destinations, response validation, 429/Retry-After, 4xx/5xx, oversized/unknown responses, network classification and secret redaction. The injected browser sender returns uncertainty first and success later; no real flomo writes occur.
+- **0.3.1:** three backend tests cover fixed output, multiline passages, omitted empty thoughts, normalized book tags, extra-tag deduplication and baseline/delivery-preserving rule migration. Whitespace checks prevent orphan quote markers while retaining original internal paragraphs. Preview spacing is CSS only; outgoing modules use one newline.
+- **0.3.2:** fourteen backend tests cover first-absence holds, second-check cancellation, stable-ID recovery, untouched sent/uncertain history, retained retries/blocks, counts/cursors/duplicate validation, failed-check reset, absent-book reads, forced light rechecks, anomaly protection, sync/send exclusion, restart recovery and schema 4→5. Browser checks cover holds, inferred deletion, cancellation, identity reuse and mobile overflow.
+- **0.3.3:** nine backend tests cover persisted switches/blocks, interrupted sends becoming uncertain, startup full-sync gating/backoff, retries/quota/cooldown/deduplication, missing/ahead/damaged checkpoints, migration baseline, authenticated explicit recovery review, restore locks/key mismatch and forced protection. The browser verifies ordinary settings cannot bypass recovery or turn on previously disabled delivery.
+- **0.3.4:** three path tests cover platform defaults, XDG fallback, source-local and symlink rejection, and legacy migration prompts. Production tests use external config/default directories and verify no source-local data/secrets. A force-tracked synthetic database is rejected by repository checks.
 
-M3 浏览器使用注入的合成 flomo sender，第一笔模拟未知结果，后续模拟成功。验证时间/模式设置保存、发送确认、准备队列、待核对处理、关闭页面后后台完成、去重、重新打开后设置保留及桌面/手机布局。真实生产没有合成发送开关。
+Earlier constrained-server browser runs experienced initialization timeouts under swap pressure. The recorded complete baseline passed using Playwright's default Chromium headless shell without weakening assertions/timeouts. Deletion-flow acceptance previously increased that long scenario's timeout to 60 seconds and fixed a selector; the full suite was rerun.
 
-0.3.1 新增 3 项后端测试，验证固定格式、多行原文、无想法省略、书名标签空白规范化、额外标签去重，以及旧规则版本迁移不丢失历史基准和已发送去重记录。补充首尾换行、CRLF、空白行不产生孤立引用标记的回归检查，确认正文内部段落保留；预览模块以单个换行拼接后与发送文本一致。浏览器验证原文与想法之间存在小于一行高度的视觉间距。现有发送测试也核对实际发送文本使用新格式。
+Published-source checks use synthetic fixtures, inspect tracked files and ignore rules, and keep private credential-audit results outside source. Layout checks cover 1920, 1440, 900 and 390 pixels for equal settings cards and the overview button icon.
 
-0.3.2 新增 14 项后端测试：首次缺失挂起、连续两轮缺失取消、恢复同 ID、已发送/待核对历史不变、重试与阻塞保留、总数/分页/重复 ID 校验、失败重置计数、消失书籍继续读取、轻量复核、异常骤降保护、同步与发送互斥、重启持久化、中断恢复，以及数据库版本 4 → 5 保留所有旧字段。
+## Bilingual regression coverage
 
-删除浏览器流程验证：首次缺失显示待复核并挂起队列，第二次完整缺失显示已删除并取消待发送任务，来源恢复复用原任务 ID；全过程已导入数量保持不变，并检查手机布局无横向溢出。首次运行发现长流程超过 45 秒及新下拉框定位问题，调整该流程上限至 60 秒并改用控件角色定位后，完整 6 项重跑通过。
+Validated on 2026-10-30: `npm run check` passed 92 Node tests (11 repository/schema/document checks and 81 runtime tests), types, lint and production build; all 12 browser tests passed. Runtime dependency audit reported zero known vulnerabilities. Source-tree checks also passed against Git-tracked files.
 
-0.3.3 新增 9 项后端测试：正常重启保留启停设置与持久化阻塞；中断发送转待核对且其他任务继续；启动完整同步门槛和失败退避；冷却、额度、重试次数与已发送去重；独立检查文件领先、缺失、损坏及旧库恢复；版本 5 → 6 迁移与首次检查基准；恢复接口认证、CSRF 和确认；恢复工具实例锁、密钥不匹配拒绝及强制恢复保护。浏览器新增恢复保护确认流程，确认不能用普通保存绕过，也不会打开原本关闭的自动导入。
+Language tests cover English fallback, Simplified/Traditional Chinese browser locales, manual preference precedence after reload, language switching on authentication and workspace pages, unavailable local storage, document language/title, translated errors/statuses, desktop/mobile layout and unchanged Chinese source content. Catalog checks compare keys and interpolation variables and exercise i18next plural selection. Documentation checks verify paired editions and local links/anchors.
 
-本次首次浏览器运行在初始化输入阶段超时，后续流程因缺少管理员状态连锁失败；当时小型服务器正在大量使用交换内存。切换至 Playwright 默认 Chromium headless shell 后，保持原有功能断言与超时设置，完整 7 项重跑通过。
+Existing Chinese browser flows explicitly use `zh-CN`; internationalization cases independently set their browser locale. The verification commands below are the source of current results; the baseline counts above are historical, not claims about an unrun future commit.
 
-0.3.4 新增 3 项路径测试，验证本机用户的默认存储位置、XDG 相对路径回退、源码目录及现有/悬空软链接拒绝，以及旧数据库迁移提示。生产入口集成测试改为使用外部 config.env 和默认应用数据目录，确认源码内不生成 data/secrets，并验证管理员、会话、密钥跨重启保留。隔离副本中强制跟踪合成数据库文件的负向检查确认发布前检查会拒绝该文件，随后清理。
-
-发布检查使用独立源码副本重新执行 `npm ci`，测试数据库与截图均使用合成数据。另检查待发布文件、全部本地 Git 对象、忽略规则和外部数据路径；私有检查记录与实际凭据不包含在仓库中。
-
-布局检查覆盖 1920、1440、900 和 390 像素宽度：设置卡片等宽，首页按钮图标居中，按钮仍能打开笔记库。
-
-## 复现
+## Reproduce
 
 ```sh
 npm ci
@@ -53,12 +53,12 @@ npm run test:e2e
 npm audit --audit-level=high
 ```
 
-完整测试使用合成凭据与笔记，不访问真实微信读书或 flomo；本地截图位于被忽略的 `test-results/`。首次安装 Chromium 可能需要下载浏览器和系统运行库；中文截图需要系统中文字体。
+All fixtures and screenshots are synthetic. Browser screenshots are ignored under `test-results/`. Chromium may require browser/system downloads; Chinese screenshots require Chinese fonts. Tests do not contact real WeRead/flomo providers.
 
-## 尚未验证
+## Unverified limits
 
-- 用户真实账号的完整同步、分页在长期使用中的一致性、修改/删除语义、大规模数据和长时间运行。
-- 本地验证为 Linux arm64；Node 24/Linux amd64 的自动检查以远端 CI 结果为准。Windows、macOS、Docker/NAS 的完整部署流程尚未验收。
-- flomo 真实账号写入响应、额度共享及实际内容限制；长时间运行与真实网络故障。自动调度、去重和发送恢复已用合成上游验证，未向用户 flomo 写入测试笔记。
+- Real-account completeness, long-term source changes/deletion consistency, very large libraries and long-running behavior.
+- Local acceptance is Linux arm64; Node24/Linux amd64 results depend on Actions. Full Windows/macOS/Docker/NAS deployment is not accepted.
+- Real flomo write responses, shared quotas and sustained network-failure behavior. Synthetic providers cover state transitions, not live account guarantees.
 
-想法以完整分页、总数一致和两次独立缺失作同步推断；异常或失败不能证明删除。没有物理删除，划线不做缺失推断。真实来源删除返回语义和长期一致性仍待验证。
+Thought deletion remains an inference from complete/count-validated independent checks. Errors cannot prove deletion. No physical source deletion occurs, and highlights are retained.

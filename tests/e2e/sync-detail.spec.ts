@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.use({ locale: 'zh-CN' });
+
 test('sync details group by book ID and preserve zero counts, missing scopes and errors', async ({ page }, info) => {
   const run = { id: 'synthetic-run', connection_id: 'synthetic-source', mode: 'full', status: 'partial', started_at: 0, finished_at: 1, error_code: null, coverage_json: '{"listComplete":true,"expectedBooks":3}', counts_json: '{}' };
   const item = (book_id: string, kind: string, count: number, error_code: string | null = null) => ({ book_id, title: '合成示例书', kind, count, error_code, status: error_code ? 'failed' : 'succeeded' });
