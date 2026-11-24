@@ -45,7 +45,7 @@ Source reads and delivery have separate state. A failed sync does not empty the 
 
 Automation is initially off. The default interval is 15 minutes, adjustable from 5 to 10,080 minutes, or a daily time. Light mode forces a full scan on the next scheduled run when the last successful full scan is at least 24 hours old. Each startup requires a successful full sync before delivery. Application scheduling limits do not imply upstream permission for that request rate.
 
-Reads use timeouts, bounded retries, backoff and `Retry-After`. Expired credentials or `upgrade_info` pause work with a visible error. Ambiguous writes follow the delivery state machine and must not reuse read-retry semantics.
+Reads use timeouts, bounded retries, backoff and `Retry-After`. Expired credentials pause work. Version notices are discarded before validating the business response. Ambiguous writes follow the delivery state machine and must not reuse read-retry semantics.
 
 ## Credentials and login
 

@@ -13,7 +13,7 @@ type Note = {
 type ThoughtScan = { verified: boolean; count: number; error?: string };
 type Connection = { id: string; secret_ref: string };
 const text = (value: unknown): string | null => typeof value === 'string' ? value : null;
-const terminalCodes = new Set(['UPSTREAM_AUTH', 'UPSTREAM_UPGRADE', 'UPSTREAM_REJECTED', 'UPSTREAM_RATE_LIMIT', 'SYNC_INTERRUPTED']);
+const terminalCodes = new Set(['UPSTREAM_AUTH', 'UPSTREAM_REJECTED', 'UPSTREAM_RATE_LIMIT', 'SYNC_INTERRUPTED']);
 
 export class SyncManager {
   private task?: Promise<void>;

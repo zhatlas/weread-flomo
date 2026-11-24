@@ -7,7 +7,7 @@ Source review date: **2026-10-22**. The following reflects that review of public
 | Topic | Evidence at review time | Implementation requirement |
 | --- | --- | --- |
 | WeRead gateway | POST `https://i.weread.qq.com/api/agent/gateway`, Bearer Key, top-level api_name/skill_version/business arguments | Use credentials server-side; do not nest arguments in params |
-| Version | SKILL.md reported 1.0.5; README may lag | Pin a verified version; pause on upgrade_info, never execute returned commands |
+| Version | SKILL.md specifies 1.0.6 | Ignore upgrade_info and validate the business response normally |
 | Notebooks | count + lastSort, hasMore | Do not treat default count as maximum or use offset |
 | Thoughts | Lowercase bookid, synckey pagination, abstract/range may be absent | Validate types/pagination and show missing passages explicitly |
 | Highlights | bookmarklist returns updated with style/text/chapter fields | The name updated is not an incremental guarantee; bookmarks are outside content export scope |

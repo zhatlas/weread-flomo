@@ -7,7 +7,7 @@
 | 事项 | 当前依据 | 实现要求 |
 | --- | --- | --- |
 | 微信读书网关 | POST `https://i.weread.qq.com/api/agent/gateway`，Bearer Key，顶层 api_name/skill_version/业务参数 | 凭据仅服务端使用，参数不包在 params 中 |
-| 版本 | SKILL.md 当前为 1.0.5；README 可能滞后 | 固定已验证版本；upgrade_info 暂停并提示升级，不执行服务器返回的任意命令 |
+| 版本 | SKILL.md 指定 1.0.6 | 忽略 upgrade_info，正常校验业务数据 |
 | 笔记本 | count + lastSort；hasMore | 不把 count 默认值当最大值，不使用 offset |
 | 想法 | bookid 小写；synckey 分页；abstract/range 可能缺失 | 类型/分页校验，缺失原文明确展示 |
 | 划线 | bookmarklist 返回 updated，含颜色/原文/章节信息 | 不把 updated 名称当成增量保证；书签不在内容导出范围 |

@@ -44,6 +44,11 @@ export class Automation {
     this.startupBaseline = (db.prepare('SELECT coalesce(max(rowid), 0) AS n FROM sync_runs').get() as { n: number }).n;
     db.transaction(() => {
       const now = this.now();
+      // Older releases paused the source schedule on advisory version notices.
+      if (this.blocks().sync === 'UPSTREAM_UPGRADE') {
+        db.prepare('UPDATE automation SET sync_block = NULL, revision = revision + 1 WHERE id = 1').run();
+        db.prepare("UPDATE job_state SET next_due_at = ?, error_code = NULL, last_result = 'waiting', failures = 0 WHERE name = 'sync'").run(this.settings().config.syncEnabled ? now : null);
+      }
       if (this.job('sync').last_result === 'running') db.prepare("UPDATE job_state SET last_result = 'interrupted', error_code = 'SYNC_INTERRUPTED', finished_at = ?, failures = failures + 1, next_due_at = ? WHERE name = 'sync'").run(now, this.settings().config.syncEnabled ? now + 60000 : null);
       db.prepare("UPDATE delivery_attempts SET outcome = 'uncertain', finished_at = ?, error_code = 'SEND_INTERRUPTED' WHERE outcome = 'started'").run(now);
       db.prepare("UPDATE deliveries SET status = 'uncertain', updated_at = ?, error_code = 'SEND_INTERRUPTED', next_attempt_at = NULL WHERE status = 'sending'").run(now);
@@ -124,7 +129,7 @@ export class Automation {
         const next = nextSchedule(current, this.now());
         this.startupRetryAt = failed ? this.now() + Math.min(3600000, 60000 * 2 ** Math.min(failures - 1, 6)) : 0;
         this.store.db.prepare("UPDATE job_state SET finished_at = ?, last_result = ?, error_code = ?, failures = ?, next_due_at = ? WHERE name = 'sync'").run(this.now(), run.status, run.error_code ?? (failed ? 'SYNC_PARTIAL' : null), failures, (current.syncEnabled || startup) ? (failed ? Math.min(next, this.now() + Math.min(3600000, 60000 * 2 ** Math.min(failures - 1, 6))) : next) : null);
-        if (['UPSTREAM_AUTH','UPSTREAM_UPGRADE','UPSTREAM_REJECTED'].includes(run.error_code ?? '')) this.pause('sync', run.error_code!);
+        if (['UPSTREAM_AUTH','UPSTREAM_REJECTED'].includes(run.error_code ?? '')) this.pause('sync', run.error_code!);
       } catch (error) { this.pause('sync', errorCode(error)); }
     }
     if (this.stopping || this.sync.busy || this.options.canRun?.() === false) return;

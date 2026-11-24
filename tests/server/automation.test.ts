@@ -145,6 +145,22 @@ test('database restart/old-backup recovery pauses writes and recovers started at
     } finally { await restored.app.close(); store.close(); }
   } finally { await f.close(); rmSync(directory, { recursive: true, force: true }); }
 });
+test('restart resumes an enabled schedule previously paused by an upgrade notice and preserves delivery blocks', async () => {
+  const p = await prepared(); const { f } = p;
+  try {
+    p.settings({ syncEnabled: true });
+    f.store.db.prepare("UPDATE automation SET sync_block = 'UPSTREAM_UPGRADE', delivery_block = 'CONNECTION_CHANGED'").run();
+    f.store.db.prepare("UPDATE job_state SET last_result = 'paused', error_code = 'UPSTREAM_UPGRADE', next_due_at = NULL WHERE name = 'sync'").run();
+    const restarted = await createApp({ store: f.store, vault: new Vault(f.store, f.key), origin: 'http://127.0.0.1:3000', setupToken: 'unused', timers: false, providerFactory: () => f.provider });
+    try {
+      await restarted.automation.tick();
+      const state = restarted.automation.state();
+      assert.equal(state.blocks.sync, null);
+      assert.equal(state.blocks.deliver, 'CONNECTION_CHANGED');
+      assert.equal(state.jobs.find(job => job.name === 'sync')?.last_result, 'succeeded');
+    } finally { await restarted.app.close(); }
+  } finally { await f.close(); }
+});
 test('shutdown waits for in-flight write to become uncertain before closing the database', async () => {
   let began!: () => void; const started = new Promise<void>((resolve) => { began = resolve; });
   const p = await prepared(async (_url, _content, signal) => { began(); return new Promise((resolve) => signal.addEventListener('abort', () => resolve({ status: 'uncertain', error: 'SEND_INTERRUPTED' }), { once: true })); });

@@ -49,7 +49,7 @@ export class WeReadClient implements Provider {
         response = await this.transport('https://i.weread.qq.com/api/agent/gateway', {
           method: 'POST', redirect: 'error',
           headers: { Authorization: `Bearer ${this.key}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...params, api_name: name, skill_version: '1.0.5' }),
+          body: JSON.stringify({ ...params, api_name: name, skill_version: '1.0.6' }),
           signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000),
         });
       } catch {
@@ -83,8 +83,9 @@ export class WeReadClient implements Provider {
         }
         const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, unknown>;
         if (!body || typeof body !== 'object' || Array.isArray(body)) throw new AppError('UPSTREAM_FORMAT', 502);
-        if ('upgrade_info' in body) throw new AppError('UPSTREAM_UPGRADE', 502);
         if (body.errcode !== undefined && body.errcode !== 0) throw new AppError('UPSTREAM_REJECTED', 502);
+        // The gateway may attach an advisory to an otherwise valid business response.
+        delete body.upgrade_info;
         return body;
       } catch (error) {
         if (error instanceof AppError) throw error;

@@ -80,7 +80,7 @@ Browser tests use temporary data and a fake provider on port 4100. The productio
 | Origin rejected | Match APP_ORIGIN exactly, including scheme/host/port, without trailing slash |
 | Expired login | Sign in again; sessions last 12 hours, and password changes revoke all devices |
 | Partial sync | Open the run and inspect affected books/types/errors, then retry |
-| UPSTREAM_FORMAT / UPGRADE | Provider structure/version changed; a client update is needed, existing data remains |
+| UPSTREAM_FORMAT | The response failed validation. Check the provider contract. Older UPSTREAM_UPGRADE pauses clear at startup so enabled schedules can resume. |
 | UPSTREAM_RATE_LIMIT | Wait before retrying; do not increase concurrency |
 | Startup fails | Check port conflicts, a second instance, permissions, matching key and schema version |
 
