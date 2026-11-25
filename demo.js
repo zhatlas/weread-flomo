@@ -1,6 +1,4 @@
-import { copy } from './strings.js';
-import { books, notes } from './samples.js';
-
+const { demoCopy: copy, demoBooks: books, demoNotes: notes } = window;
 const byId = id => document.getElementById(id);
 const language = byId('language');
 const book = byId('book');
