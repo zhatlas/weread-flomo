@@ -13,9 +13,9 @@ header { background: #fff; border-bottom: 1px solid var(--line); }
 .brand { gap: 7px; white-space: nowrap; font-size: 19px; }
 .brand img { margin-right: 3px; }
 .brand span { color: #778b77; font-weight: 400; }
-nav { gap: clamp(8px, 2vw, 22px); }
+nav { gap: clamp(8px, 2vw, 22px); white-space: nowrap; }
 a { color: var(--green); font-size: 14px; text-underline-offset: 4px; }
-nav select { padding: 4px; background: transparent; border: 0; }
+nav select { width: auto; padding: 4px; background: transparent; border: 0; }
 main { padding-block: clamp(28px, 5vw, 62px); }
 h1, h2, p { margin: 0; }
 h1 { font: 500 clamp(34px, 4vw, 54px)/1.2 Georgia, "Songti SC", serif; letter-spacing: -.025em; }
