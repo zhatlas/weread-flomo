@@ -4,6 +4,8 @@
 
 [打开互动演示](https://zhatlas.github.io/weread-flomo/)，在浏览器中筛选虚构笔记，预览导入 flomo 的内容。
 
+![演示中的虚构笔记库与 flomo 导入预览](docs/images/demo.png)
+
 [使用与运维](docs/usage.zh-CN.md) · [产品设计](docs/product.zh-CN.md) · [实施计划](docs/roadmap.zh-CN.md)
 
 为个人自行部署的微信读书工具：保存划线和想法，在浏览器里整理自己的阅读库，并按条件自动导入 flomo。

@@ -4,6 +4,8 @@
 
 [Try the interactive demo](https://zhatlas.github.io/weread-flomo/) to filter fictional notes and preview their flomo import text in your browser.
 
+![Demo library with fictional notes and a flomo import preview](docs/images/demo.png)
+
 A self-hosted workspace for WeRead highlights and thoughts. Keep your reading library locally, browse it in your browser, and automatically send selected notes to flomo. MIT licensed; not affiliated with Tencent, WeRead or flomo.
 
 **Current scope: M1–M3 are implemented.** Administrator login, encrypted connections, background synchronization, notes, visual rules, import previews, persistent schedules and a durable delivery queue are available. Automation is initially disabled and must be enabled on the Automation page. Tests use synthetic providers; real flomo writes require validation by the deployer.
