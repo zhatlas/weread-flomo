@@ -192,4 +192,4 @@ npm run restore -- --from /绝对路径/备份/app.sqlite
 
 ## 发布公开演示
 
-GitHub Pages 从 `gh-pages` 分支根目录发布站点。在 main 分支提交 `demo/` 内的虚构样例或静态界面改动后，执行 `git subtree push --prefix=demo origin gh-pages` 更新站点。发布内容仅限 `demo/` 内的文件。
+GitHub Pages 从 `gh-pages` 分支根目录发布站点。修改正式前端或 `scripts/demo/` 中的虚构数据后，执行 `npm run build:demo`。生成的静态页面复用应用组件，使用内存数据，可以离线打开。将重新生成的 `demo/` 提交到 main 后，执行 `git subtree push --prefix=demo origin gh-pages` 更新站点。发布内容仅限 `demo/` 内的文件。

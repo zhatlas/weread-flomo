@@ -2,10 +2,17 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
-[打开互动演示](https://zhatlas.github.io/weread-flomo/)，在浏览器中筛选虚构笔记，预览导入 flomo 的内容。
+[打开互动演示](https://zhatlas.github.io/weread-flomo/)，体验阅读概览、筛选虚构笔记，并在规则页预览导入内容。
 也可以[下载离线演示 ZIP](https://github.com/zhatlas/weread-flomo/archive/refs/heads/gh-pages.zip)，解压后直接打开 `index.html`。
 
-![演示中的虚构笔记库与 flomo 导入预览](docs/images/demo.png)
+![演示中的阅读概览，全部为虚构数据](docs/images/demo.zh-CN.png)
+
+<details>
+<summary>查看 flomo 导入预览</summary>
+
+![规则匹配结果与虚构笔记的导入文本](docs/images/demo-preview.zh-CN.png)
+
+</details>
 
 [使用与运维](docs/usage.zh-CN.md) · [产品设计](docs/product.zh-CN.md) · [实施计划](docs/roadmap.zh-CN.md)
 

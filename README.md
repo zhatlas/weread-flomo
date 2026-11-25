@@ -2,10 +2,17 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
-[Try the interactive demo](https://zhatlas.github.io/weread-flomo/) to filter fictional notes and preview their flomo import text in your browser.
+[Try the interactive demo](https://zhatlas.github.io/weread-flomo/) to explore the workspace, filter fictional notes, and preview import rules.
 For offline use, [download the demo ZIP](https://github.com/zhatlas/weread-flomo/archive/refs/heads/gh-pages.zip), extract it, and open `index.html`.
 
-![Demo library with fictional notes and a flomo import preview](docs/images/demo.png)
+![Reading overview in the interactive demo, with fictional data](docs/images/demo.png)
+
+<details>
+<summary>Preview a flomo import</summary>
+
+![Rule results and sample memo text](docs/images/demo-preview.png)
+
+</details>
 
 A self-hosted workspace for WeRead highlights and thoughts. Keep your reading library locally, browse it in your browser, and automatically send selected notes to flomo. MIT licensed; not affiliated with Tencent, WeRead or flomo.
 

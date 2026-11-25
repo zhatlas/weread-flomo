@@ -192,4 +192,4 @@ Run `npm run check` before publishing. Source and tracked-file checks catch priv
 
 ## Publish the public demo
 
-The GitHub Pages site uses the root of the `gh-pages` branch. After committing changes to the fictional samples or static interface in `demo/`, run `git subtree push --prefix=demo origin gh-pages` from the updated main branch. Only files under `demo/` belong on the public site.
+The GitHub Pages site uses the root of the `gh-pages` branch. Run `npm run build:demo` after changing the web UI or fictional data in `scripts/demo/`. The static bundle uses the application components with an in-memory data source and supports offline use. After committing the regenerated `demo/`, run `git subtree push --prefix=demo origin gh-pages` from the updated main branch. Only files under `demo/` belong on the public site.

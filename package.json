@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "node --import tsx --watch src/server/main.ts",
+    "build:demo": "node scripts/demo/build.mjs",
     "dev:web": "vite",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
