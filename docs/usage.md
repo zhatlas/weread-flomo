@@ -189,3 +189,7 @@ To migrate an older installation:
 A legacy source-local `data/app.sqlite` causes startup/restore to refuse rather than silently initialize an empty database. Restore must use the same external configuration as the running service; service-only environment variables are not inherited by an unrelated terminal.
 
 Run `npm run check` before publishing. Source and tracked-file checks catch private artifacts even if force-added past `.gitignore`. Tests use synthetic data in temporary directories. Publish code/examples only, never external runtime directories, backups, personal screenshots or diagnostics. Pattern checks do not replace reviewing arbitrary personal text and Git history.
+
+## Publish the public demo
+
+The GitHub Pages site uses the root of the `gh-pages` branch. After committing changes to the fictional samples or static interface in `demo/`, run `git subtree push --prefix=demo origin gh-pages` from the updated main branch. Only files under `demo/` belong on the public site.
