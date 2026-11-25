@@ -3,6 +3,7 @@
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 [打开互动演示](https://zhatlas.github.io/weread-flomo/)，在浏览器中筛选虚构笔记，预览导入 flomo 的内容。
+也可以[下载离线演示 ZIP](https://github.com/zhatlas/weread-flomo/archive/refs/heads/gh-pages.zip)，解压后直接打开 `index.html`。
 
 ![演示中的虚构笔记库与 flomo 导入预览](docs/images/demo.png)
 

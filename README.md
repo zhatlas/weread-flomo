@@ -3,6 +3,7 @@
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 [Try the interactive demo](https://zhatlas.github.io/weread-flomo/) to filter fictional notes and preview their flomo import text in your browser.
+For offline use, [download the demo ZIP](https://github.com/zhatlas/weread-flomo/archive/refs/heads/gh-pages.zip), extract it, and open `index.html`.
 
 ![Demo library with fictional notes and a flomo import preview](docs/images/demo.png)
 

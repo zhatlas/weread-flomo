@@ -1,11 +1,11 @@
 // Original, fictional book metadata and notes written solely for the public demo.
-export const books = {
+window.demoBooks = {
   tide: { title: '潮汐标本室', author: '苔屿' },
   type: { title: 'The Quiet Typesetter', author: 'M. Quillby' },
   garden: { title: '温室里的时钟', author: '折枝' }
 };
 
-export const notes = [
+window.demoNotes = [
   { book: 'tide', kind: 'thought', chapter: '退潮之后',
     passage: '潮水退去，木桩上的盐线还停在昨夜。',
     thought: '如果只记下海水的高度，就会漏掉它停留的时间。' },

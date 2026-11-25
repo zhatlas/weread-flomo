@@ -1,4 +1,4 @@
-export const copy = {
+window.demoCopy = {
   en: {
     title: 'Interactive demo', library: 'Reading library', notes: 'Notes', book: 'Book', kind: 'Type',
     intro: 'Explore fictional notes and preview how they would appear in flomo. All interactions stay in this browser.',
