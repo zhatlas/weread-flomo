@@ -3,43 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
   <meta name="referrer" content="no-referrer">
-  <meta name="theme-color" content="#f7f8f4">
   <link rel="icon" href="./favicon.svg">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./assets/workspace.css">
   <title>WeRead → flomo · Demo</title>
-  <script defer src="./strings.js"></script>
-  <script defer src="./samples.js"></script>
-  <script defer src="./demo.js"></script>
+  <script defer src="./assets/workspace.js"></script>
 </head>
 <body>
-  <header><div class="bar">
-    <strong class="brand"><img src="./favicon.svg" width="30" height="30" alt="">WeRead <span>→</span> flomo</strong>
-    <nav><select id="language" aria-label="Language / 语言"><option value="en">English</option><option value="zh-CN">简体中文</option></select>
-    <a href="https://github.com/zhatlas/weread-flomo" rel="noreferrer">GitHub ↗</a></nav>
-  </div></header>
-  <main>
-    <h1 data-i18n="library">Reading library</h1>
-    <p class="intro" data-i18n="intro">Explore fictional notes and preview how they would appear in flomo. All interactions stay in this browser.</p>
-    <div class="workbench">
-      <section class="library" aria-labelledby="notes-title">
-        <div class="section-head"><h2 id="notes-title" data-i18n="notes">Notes</h2><span id="count" role="status"></span></div>
-        <div class="filters">
-          <label><span data-i18n="search">Search</span><input type="search" id="search" autocomplete="off"></label>
-          <label><span data-i18n="book">Book</span><select id="book"></select></label>
-          <label><span data-i18n="kind">Type</span><select id="kind"><option value="" data-i18n="allKinds">All types</option><option value="highlight" data-i18n="highlight">Highlight</option><option value="thought" data-i18n="thought">Thought</option></select></label>
-        </div>
-        <div id="notes"></div>
-        <p id="empty" data-i18n="empty" hidden>No matching notes. Try another search or filter.</p>
-      </section>
-      <aside aria-labelledby="preview-title">
-        <div class="section-head"><h2 id="preview-title" data-i18n="preview">flomo import preview</h2></div>
-        <div id="memo" aria-live="polite" aria-atomic="true"></div>
-        <p class="hint" id="preview-hint"></p>
-      </aside>
-    </div>
-    <noscript>This interactive demo requires JavaScript. 此演示需要启用 JavaScript。</noscript>
-  </main>
+  <div class="demo-banner"><span lang="en">Demo · Fictional notes. Changes last until reload.</span><span lang="zh-CN">互动演示 · 使用虚构笔记，刷新后还原。</span><a href="https://github.com/zhatlas/weread-flomo" rel="noreferrer">GitHub ↗</a></div>
+  <div id="root"></div>
+  <noscript>This demo requires JavaScript. 此演示需要启用 JavaScript。</noscript>
 </body>
 </html>
