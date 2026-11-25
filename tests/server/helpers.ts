@@ -10,7 +10,7 @@ import type { Provider } from '../../src/server/weread.js';
 import { syntheticKey, password, setupToken } from '../fixtures.js';
 export { syntheticKey, password, setupToken };
 
-export const origin = 'http://127.0.0.1:3000';
+export const origin = 'http://127.0.0.1:4000';
 export const sampleHighlight = { bookmarkId: 'highlight-1', bookId: 'book-1', chapterUid: 1, range: '1-20', markText: '读书让我们看见更多可能。', createTime: 1767225600, colorStyle: 1, unknownFutureField: { kept: true } };
 export const sampleThought = { reviewId: 'thought-1', bookId: 'book-1', chapterUid: 1, range: '1-20', content: '把阅读变成自己的思考。', createTime: 1767312000 };
 export class FakeProvider implements Provider {

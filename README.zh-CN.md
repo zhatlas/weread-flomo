@@ -41,7 +41,7 @@ npm run build
 npm start
 ```
 
-打开 `http://127.0.0.1:3000`。首次设置需要读取启动日志所示位置的 `setup-token` 文件，将令牌填入页面，创建自己的管理员账号和至少 12 字符的密码。没有默认账号或默认密码。
+打开 `http://127.0.0.1:4000`。首次设置需要读取启动日志所示位置的 `setup-token` 文件，将令牌填入页面，创建自己的管理员账号和至少 12 字符的密码。没有默认账号或默认密码。
 
 先在[微信读书官方接入页](https://weread.qq.com/r/weread-skills)获取自己的 API Key；需要导入时，在 [flomo API 页面](https://help.flomoapp.com/advance/api.html)按官方说明获取专属地址。账号权限与额度以上游提供的实际能力为准。
 

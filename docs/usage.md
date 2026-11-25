@@ -6,7 +6,7 @@
 
 Use Node.js 24 LTS (minimum 22.18). `better-sqlite3` attempts to download a native prebuilt binary; platforms without one need local C/C++ build tools. Local development verification is Linux arm64. Other platforms and Docker images have not received full deployment acceptance testing.
 
-From the repository root, run `npm ci`, `npm run build`, then `npm start`. Open `http://127.0.0.1:3000`. The default listener is loopback; UI and API share an origin. First startup creates the database, independent master key and setup token. Read `setup-token` at the path shown in the startup log, then create the administrator. Initialization closes afterward; the old token is no longer valid and its file may be removed.
+From the repository root, run `npm ci`, `npm run build`, then `npm start`. Open `http://127.0.0.1:4000`. The default listener is loopback; UI and API share an origin. First startup creates the database, independent master key and setup token. Read `setup-token` at the path shown in the startup log, then create the administrator. Initialization closes afterward; the old token is no longer valid and its file may be removed.
 
 One process may use a data directory. Sync returns a task ID and continues server-side after the browser closes. Shutdown or a run timeout interrupts the current run. Manual sync can be retried; enabled automatic sync resumes according to its persisted schedule/backoff.
 
@@ -25,8 +25,8 @@ Copy the contents of `.env.example` to `config.env` in the external application-
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | APP_HOST | 127.0.0.1 | Listener address |
-| APP_PORT | 3000 | Listener port |
-| APP_ORIGIN | http://127.0.0.1:3000 | Exact browser origin, no trailing slash |
+| APP_PORT | 4000 | Listener port |
+| APP_ORIGIN | http://127.0.0.1:4000 | Exact browser origin, no trailing slash |
 | DATA_DIR | application-data directory/data | External SQLite directory |
 | SECRETS_DIR | application-data directory/secrets | External master-key/setup/checkpoint directory |
 
@@ -68,7 +68,7 @@ APP_ORIGIN=http://127.0.0.1:5173 npm run dev
 npm run dev:web
 ```
 
-Open `http://127.0.0.1:5173`. Vite proxies `/api` to port 3000; provider credentials remain server-side. `npm run check` runs types, lint, Node tests and build. Browser tests require built assets and Playwright Chromium.
+Open `http://127.0.0.1:5173`. Vite proxies `/api` to port 4000; provider credentials remain server-side. `npm run check` runs types, lint, Node tests and build. Browser tests require built assets and Playwright Chromium.
 
 Browser tests use temporary data and a fake provider on port 4100. The production-entrypoint restart test uses port 4101 without real connections. There is no production demo/arbitrary-provider switch. Tests stop servers and remove temporary databases; synthetic screenshots go into ignored `test-results/`.
 

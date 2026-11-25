@@ -8,10 +8,10 @@ import { loadRuntimeConfig, runtimePaths } from './paths.js';
 
 process.umask(0o077);
 loadRuntimeConfig();
-const origin = process.env.APP_ORIGIN ?? 'http://127.0.0.1:3000';
+const origin = process.env.APP_ORIGIN ?? 'http://127.0.0.1:4000';
 const url = new URL(origin);
 if (!['http:', 'https:'].includes(url.protocol) || url.origin !== origin) throw new Error('APP_ORIGIN must be an HTTP(S) origin without a trailing slash');
-const port = Number(process.env.APP_PORT ?? 3000);
+const port = Number(process.env.APP_PORT ?? 4000);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('APP_PORT_INVALID');
 const paths = runtimePaths();
 const secretsDir = paths.secrets;

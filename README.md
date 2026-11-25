@@ -39,7 +39,7 @@ npm run build
 npm start
 ```
 
-Open `http://127.0.0.1:3000`. Read the `setup-token` file at the location printed in the startup log. Create your own administrator username and a password of at least 12 characters. There are no default credentials.
+Open `http://127.0.0.1:4000`. Read the `setup-token` file at the location printed in the startup log. Create your own administrator username and a password of at least 12 characters. There are no default credentials.
 
 Get your key from the [official WeRead integration page](https://weread.qq.com/r/weread-skills). For delivery, follow the [flomo API instructions](https://help.flomoapp.com/advance/api.html). Permissions and quotas depend on your upstream accounts.
 

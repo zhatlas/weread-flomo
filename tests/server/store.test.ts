@@ -48,7 +48,7 @@ test('server shutdown interrupts the worker before the database is closed', asyn
   const vault = new Vault(store, randomBytes(32));
   vault.put('key', 'synthetic-value');
   store.db.prepare("INSERT INTO connections VALUES ('source', 'weread', 1, 'key', 1)").run();
-  const { app, sync } = await createApp({ store, vault, setupToken: 'unused', origin: 'http://127.0.0.1:3000', providerFactory: () => ({
+  const { app, sync } = await createApp({ store, vault, setupToken: 'unused', origin: 'http://127.0.0.1:4000', providerFactory: () => ({
     call: async (_name, _params, signal) => new Promise((_resolve, reject) => signal!.addEventListener('abort', () => reject(new Error('aborted')), { once: true })),
   }) });
   app.addHook('onClose', async () => { store.close(); });
